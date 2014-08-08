@@ -185,6 +185,9 @@ EOF
             exit 1
         fi
         cat >> "$localrc_file" << EOF
+# Need to force devstack to run because we currently use saucy
+FORCE=yes
+
 SKIP_EXERCISES=${SKIP_EXERCISES},volumes
 XENAPI_PASSWORD=${DEVSTACK_GATE_XENAPI_PASSWORD}
 XENAPI_CONNECTION_URL=http://${DEVSTACK_GATE_XENAPI_DOM0_IP}
@@ -430,7 +433,7 @@ EOF
     echo "Running devstack"
     echo "... this takes 5 - 8 minutes (logs in logs/devstacklog.txt.gz)"
     start=$(date +%s)
-    sudo -H -u stack stdbuf -oL -eL ./stack.sh > /dev/null
+    sudo -H -u stack FORCE=yes stdbuf -oL -eL ./stack.sh > /dev/null
     end=$(date +%s)
     took=$((($end - $start) / 60))
     if [[ "$took" -gt 15 ]]; then
