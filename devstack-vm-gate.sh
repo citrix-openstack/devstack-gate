@@ -222,6 +222,10 @@ VOLUME_BACKING_DEVICE=/dev/xvdb
 
 # Set multi-host config
 MULTI_HOST=1
+
+# Set the network name of the integration bridge
+XEN_INTEGRATION_BRIDGE=${DEVSTACK_GATE_XS_INT_BR}
+
 EOF
     fi
 
