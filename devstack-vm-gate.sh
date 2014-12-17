@@ -62,7 +62,7 @@ function setup_localrc {
     # TODO(afazekas): add c-vol
     if [[ $role = sub ]]; then
         if [[ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]]; then
-            MY_ENABLED_SERVICES="q-agt,n-cpu,ceilometer-acompute"
+            MY_ENABLED_SERVICES="q-domua,q-agt,n-cpu,ceilometer-acompute"
         else
             MY_ENABLED_SERVICES="n-cpu,ceilometer-acompute"
         fi
