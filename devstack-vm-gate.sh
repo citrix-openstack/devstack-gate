@@ -195,7 +195,7 @@ VNCSERVER_PROXYCLIENT_ADDRESS=${DEVSTACK_GATE_XENAPI_DOM0_IP}
 VIRT_DRIVER=xenserver
 
 # A separate xapi network is created with this name-label
-FLAT_NETWORK_BRIDGE=vmnet
+FLAT_NETWORK_BRIDGE=${DEVSTACK_GATE_XENAPI_FLATNET}
 
 # A separate xapi network on eth4 serves the purpose of the public network
 PUBLIC_INTERFACE=eth4
