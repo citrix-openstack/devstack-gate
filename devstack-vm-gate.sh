@@ -226,6 +226,9 @@ MULTI_HOST=1
 # Set the network name of the integration bridge
 XEN_INTEGRATION_BRIDGE=${DEVSTACK_GATE_XS_INT_BR}
 
+# Neutron: disable security groups
+Q_USE_SECGROUP=False
+
 EOF
     fi
 
