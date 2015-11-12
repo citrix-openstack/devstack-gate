@@ -36,7 +36,7 @@ ahead of time and kept in a pool ready for immediate use. The process
 of preparing the machines ahead of time reduces network traffic and
 external dependencies during the run.
 
-The `Nodepool`_ project is used to maintain this pool of machines.  See
+The `Nodepool`_ project is used to maintain this pool of machines.
 
 .. _Nodepool: https://git.openstack.org/cgit/openstack-infra/nodepool
 
@@ -105,8 +105,8 @@ First, it helps if you have access to a virtual machine from one of the
 providers the OpenStack project is using for gating, since their
 performance characteristics and necessary build parameters are already
 known. The same thing can of course be done locally or on another
-provider, but you'll want to make sure you have a basic Ubuntu 12.04 LTS
-(Precise Pangolin) image with sufficient memory and processor count.
+provider, but you'll want to make sure you have a basic Ubuntu 14.04 LTS
+(Trusty Tahr) image with sufficient memory and processor count.
 These days Tempest testing is requiring in excess of 2GiB RAM (4 should
 be enough but we typically use 8) and completes within an hour on a
 4-CPU virtual machine.
@@ -140,8 +140,9 @@ By comparison, a provider settings file for HPCloud::
 
 Note: The image regularly changes as new images are uploaded, for the
 specific image name currently used for tests, see
-`nodepool.yaml.erb <http://git.openstack.org/cgit/openstack-infra/config/
-tree/modules/openstack_project/templates/nodepool/nodepool.yaml.erb>`_.
+`nodepool.yaml.erb <http://git.openstack.org/cgit/openstack-infra/
+system-config/tree/modules/openstack_project/templates/nodepool/
+nodepool.yaml.erb>`_.
 
 Source the provider settings, boot a server named "testserver" (chosen
 arbitrarily for this example) with your SSH key allowed, and log into
@@ -162,9 +163,10 @@ Upgrade the server, install git and pip packages, add tox via pip
 a current kernel::
 
   apt-get install -y git \
-  && git clone https://review.openstack.org/p/openstack-infra/config \
-  && config/install_puppet.sh && config/install_modules.sh \
-  && puppet apply --modulepath=/root/config/modules:/etc/puppet/modules \
+  && git clone https://review.openstack.org/p/openstack-infra/system-config \
+  && system-config/install_puppet.sh && system-config/install_modules.sh \
+  && puppet apply \
+  --modulepath=/root/system-config/modules:/etc/puppet/modules \
   -e "class { openstack_project::single_use_slave: install_users => false,
   ssh_key => \"$( cat .ssh/id_rsa.pub | awk '{print $2}' )\" }" \
   && echo "jenkins ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
@@ -200,24 +202,22 @@ Switch to the workspace and get a copy of devstack-gate::
 
 At this point you're ready to set the same environment variables and run
 the same commands/scripts as used in the desired job. The definitions
-for these are found in the openstack-infra/config project under the
-modules/openstack_project/files/jenkins_job_builder/config directory in
-a file named devstack-gate.yaml. It will probably look something like::
+for these are found in the openstack-infra/project-config project under
+the jenkins/jobs directory in a file named devstack-gate.yaml. It will
+probably look something like::
 
   export PYTHONUNBUFFERED=true
   export DEVSTACK_GATE_TIMEOUT=120
   export DEVSTACK_GATE_TEMPEST=1
   export DEVSTACK_GATE_TEMPEST_FULL=1
-  export RE_EXEC=true
   cp devstack-gate/devstack-vm-gate-wrap.sh ./safe-devstack-vm-gate-wrap.sh
   ./safe-devstack-vm-gate-wrap.sh
 
 If you're trying to figure out which devstack gate jobs run for a given
 project+branch combination, this is encoded in the
-openstack-infra/config project under the
-modules/openstack_project/files/zuul directory in a file named
-layout.yaml. You'll want to look in the "projects" section for a list of
-jobs run on a given project in the "gate" pipeline, and then consult the
+openstack-infra/project-config project under the zuul/ directory in a file
+named layout.yaml. You'll want to look in the "projects" section for a list
+of jobs run on a given project in the "gate" pipeline, and then consult the
 "jobs" section of the file to see if there are any overrides indicating
 which branches qualify for the job and whether or not its voting is
 disabled.
@@ -232,9 +232,9 @@ one.
 Refer to the `Jenkins Job Builder`_ and Zuul_ documentation for more
 information on their configuration file formats.
 
-.. _`Jenkins Job Builder`: http://ci.openstack.org/jjb.html
+.. _`Jenkins Job Builder`: http://docs.openstack.org/infra/system-config/jjb.html
 
-.. _Zuul: http://ci.openstack.org/zuul.html
+.. _Zuul: http://docs.openstack.org/infra/system-config/zuul.html
 
 Contributions Welcome
 =====================
@@ -246,10 +246,11 @@ the relevant repository::
 
     https://git.openstack.org/cgit/openstack-infra/devstack-gate
     https://git.openstack.org/cgit/openstack-infra/nodepool
-    https://git.openstack.org/cgit/openstack-infra/config
+    https://git.openstack.org/cgit/openstack-infra/system-config
+    https://git.openstack.org/cgit/openstack-infra/project-config
 
-You can file bugs on the openstack-ci project::
+You can file bugs on the storyboard devstack-gate project::
 
-    https://launchpad.net/openstack-ci
+    https://storyboard.openstack.org/#!/project/712
 
 And you can chat with us on Freenode in #openstack-dev or #openstack-infra.

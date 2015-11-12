@@ -20,6 +20,8 @@
 
 source functions.sh
 
+SUDO=""
+
 # Mock out the checkout function since the refs we're checking out do
 # not exist.
 function git_checkout {
@@ -96,6 +98,16 @@ function assert_equal {
         ERROR=1
     else
         echo "$function:L$lineno - ok"
+    fi
+}
+
+function assert_raises {
+    local lineno=`caller 0 | awk '{print $1}'`
+    local function=`caller 0 | awk '{print $2}'`
+    eval "$@" &>/dev/null
+    if [[ $? -eq 0 ]]; then
+        ERROR=1
+        echo "ERROR: \`\`$@\`\` returned OK instead of error in $function:L$lineno!"
     fi
 }
 
@@ -386,6 +398,77 @@ function test_periodic {
     assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'stable/havana'
 }
 
+# Run setup_project without setting a ZUUL_BRANCH which is how a subset of
+# periodic jobs operate
+function test_periodic_no_branch {
+
+    declare -A TEST_GIT_CHECKOUTS
+    declare -A TEST_ZUUL_REF
+    local ZUUL_PROJECT='openstack/glance'
+
+    setup_project openstack/glance 'master'
+
+    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'master'
+}
+
+# setup_workspace fails without argument
+function test_workspace_branch_arg {
+    assert_raises setup_workspace
+}
+
+function test_call_hook_if_defined {
+
+    local filename=test_call_hook_if_defined.txt
+    local save_dir=`pwd`/tmp
+
+    mkdir -p $save_dir
+
+    function demo_script {
+        local filename=$1
+        local save_dir=$2
+        # Clean up any files from previous tests
+        rm -f $save_dir/$filename
+        call_hook_if_defined test_hook $filename $save_dir
+        ret_val=$?
+        return $ret_val
+    }
+
+    # No hook defined returns success 0 & no file created
+    demo_script $filename $save_dir
+    ret_val=$?
+    assert_equal "$ret_val" "0"
+
+    [[ -e $save_dir/$filename ]]
+    file_exists=$?
+    assert_equal $file_exists 1
+
+    # Hook defined returns its error code and file with output
+    function test_hook {
+        echo "hello test_hook"
+        return 123
+    }
+    demo_script $filename $save_dir
+    ret_val=$?
+    assert_equal "$ret_val" "123"
+
+    [[ -e $save_dir/$filename ]]
+    file_exists=$?
+    assert_equal $file_exists 0
+
+    # Make sure the expected contents has length > 0
+    result_expected=`cat $save_dir/$filename | grep "hello test_hook"`
+    [[ ${#result_expected} -eq "0" ]]
+    assert_equal $? 1
+
+    # Hook defined with invalid file fails
+    demo_script /invalid/file.txt $save_dir
+    ret_val=$?
+    assert_equal "$ret_val" "1"
+
+    # Clean up
+    rm -rf $save_dir
+}
+
 # Run tests:
 #set -o xtrace
 test_branch_override
@@ -396,7 +479,10 @@ test_multi_branch_on_stable
 test_multi_branch_project_override
 test_one_on_master
 test_periodic
+test_periodic_no_branch
 test_two_on_master
+test_workspace_branch_arg
+test_call_hook_if_defined
 
 if [[ ! -z "$ERROR" ]]; then
     echo

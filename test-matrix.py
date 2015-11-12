@@ -35,8 +35,8 @@ def parse_features(fname):
 
 
 def normalize_branch(branch):
-    if branch.startswith("feature/"):
-        # Feature branches chase master and should be tested
+    if branch.startswith(("feature/", "bug/")):
+        # Feature and bug branches chase master and should be tested
         # as if they were the master branch.
         branch = GRID['branches']['default']
     elif branch.startswith("stable/"):
@@ -58,7 +58,7 @@ def normalize_branch(branch):
             # projects are developing master.
             branch = GRID['branches']['default']
     if branch not in ALLOWED_BRANCHES:
-        LOG.error("unknown branch name %s" % branch)
+        LOG.error("branch not allowed by features matrix: %s" % branch)
         sys.exit(1)
     return branch
 

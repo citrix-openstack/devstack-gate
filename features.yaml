@@ -1,6 +1,7 @@
 config:
   default:
     master: [default, glance, horizon, nova, swift, cinder, keystone]
+    liberty: [default, glance, horizon, nova, swift, cinder, keystone]
     juno: [default, glance, horizon, nova, swift, cinder, keystone]
     icehouse: [default, glance, horizon, nova, swift, cinder, keystone]
     havana: [default, glance, horizon, nova, swift, cinder, keystone]
@@ -8,13 +9,13 @@ config:
     # and don't need to incur the overhead of installing all services in the process.
     no_services: [default]
   neutron:
-    features: [neutron]
+    features: [neutron, neutron-adv]
   # different backends
   postgres:
     features: [postgresql]
   # feature changes for different test matrixes
   grenade:
-    rm-features: [trove, sahara]
+    rm-features: [trove, sahara, neutron-adv]
   tempest:
     features: [tempest]
   # feature changes for different configs of existing services
@@ -40,12 +41,14 @@ config:
     features: [zeromq]
   ceph:
     features: [ceph]
+  heat:
+    features: [heat]
 
 branches:
   # The value of ""default" is the name of the "trunk" branch
   default: master
   # Normalized branch names only here, e.g. stable/icehouse => icehouse
-  allowed: [master, juno, icehouse, havana]
+  allowed: [master, liberty, kilo, juno, icehouse]
 
 features:
   default:
@@ -55,8 +58,6 @@ features:
   ceilometer:
     base:
       services: [ceilometer-acompute, ceilometer-acentral, ceilometer-collector, ceilometer-api, ceilometer-alarm-notifier, ceilometer-alarm-evaluator, ceilometer-anotification]
-    havana:
-      rm-services: [ceilometer-alarm-notifier, ceilometer-alarm-evaluator, ceilometer-anotification]
 
   glance:
     base:
@@ -73,8 +74,6 @@ features:
   nova:
     base:
       services: [n-api, n-cond, n-cpu, n-crt, n-net, n-obj, n-sch]
-    havana:
-      rm-compute-ext:
     icehouse:
       compute-ext:
 
@@ -89,8 +88,15 @@ features:
 
   neutron:
     base:
-      services: [quantum, q-svc, q-agt, q-dhcp, q-l3, q-meta, q-lbaas, q-vpn, q-fwaas, q-metering]
+      services: [quantum, q-svc, q-agt, q-dhcp, q-l3, q-meta, q-metering]
       rm-services: [n-net]
+
+  neutron-adv:
+    base:
+      services: [q-lbaas, q-fwaas]
+      rm-services: [n-net]
+    kilo:
+      services: [q-vpn]
 
   swift:
     base:
@@ -111,6 +117,7 @@ features:
   ironic:
     base:
       services: [ir-api, ir-cond]
+      rm-services: [cinder, c-api, c-vol, c-sch, c-bak]
 
   sahara:
     base:
