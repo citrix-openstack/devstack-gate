@@ -456,7 +456,7 @@ sudo -H pip install virtualenv
 virtualenv /tmp/ansible
 # NOTE(emilien): workaround to avoid installing cryptography
 # https://github.com/ansible/ansible/issues/15665
-/tmp/ansible/bin/pip install paramiko==1.16.0 ansible==$ANSIBLE_VERSION
+sudo -H /tmp/ansible/bin/pip install paramiko==1.16.0 ansible==$ANSIBLE_VERSION
 export ANSIBLE=/tmp/ansible/bin/ansible
 
 # Write inventory file with groupings
