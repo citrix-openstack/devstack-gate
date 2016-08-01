@@ -71,15 +71,19 @@ function setup_nova_net_networking {
     # issue with nova net configuring br100 to take over eth0
     # by default.
     # TODO (clarkb): figure out how to make bridge setup sane with ansible.
-    ovs_vxlan_bridge "br_pub" $primary_node "True" 1 \
-                    $FLOATING_HOST_PREFIX $FLOATING_HOST_MASK \
-                    $sub_nodes
-    ovs_vxlan_bridge "br_flat" $primary_node "False" 128 \
-                    $sub_nodes
-    cat <<EOF >>"$localrc"
+    if [[ "$DEVSTACK_GATE_VIRT_DRIVER" != "xenapi" ]]; then
+        # The following work around shouldn't be applied on xenapi, as xenserver
+        # has vmnet connected on eth3.
+        ovs_vxlan_bridge "br_pub" $primary_node "True" 1 \
+                        $FLOATING_HOST_PREFIX $FLOATING_HOST_MASK \
+                        $sub_nodes
+        ovs_vxlan_bridge "br_flat" $primary_node "False" 128 \
+                        $sub_nodes
+        cat <<EOF >>"$localrc"
 FLAT_INTERFACE=br_flat
 PUBLIC_INTERFACE=br_pub
 EOF
+    fi
 }
 
 function setup_multinode_connectivity {
@@ -400,8 +404,8 @@ EXTRA_OPTS=("xenapi_disable_agent=True")
 # Add a separate device for volumes
 VOLUME_BACKING_DEVICE=/dev/xvdb
 
-# Set multi-host config
-MULTI_HOST=1
+# We use single host for XenAPI test
+MULTI_HOST=False
 EOF
 
         # neutron network will set FLAT_NETWORK_BRIDGE in pre_test_hook
