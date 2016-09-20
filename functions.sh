@@ -331,7 +331,9 @@ function fix_disk_layout {
     # Rackspace also doesn't have enough space on / for two devstack installs,
     # so we partition the disk and mount it on /opt, syncing the previous
     # contents of /opt over.
-    SWAPSIZE=8192
+    #SWAPSIZE=8192
+    #temporarily change it as 4000 to skip creating swap on /root
+    SWAPSIZE=4000
     swapcurrent=$(( $(grep SwapTotal /proc/meminfo | awk '{ print $2; }') / 1024 ))
 
     if [[ $swapcurrent -lt $SWAPSIZE ]]; then
